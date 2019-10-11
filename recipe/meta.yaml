@@ -10,9 +10,7 @@ source:
   url: http://www.inchi-trust.org/download/105/INCHI-1-SRC.zip
   sha1:  {{ sha1 }}
   patches:
-    # downloaded package comes with no build scripts, need to
-    # provide our own
-    - SConstruct.patch
+    - osx.patch  # [osx]
 
 build:
   number: 0
@@ -21,8 +19,7 @@ build:
 requirements:
   build:
     - {{ compiler('c') }}
-  host:
-    - scons
+    - make  # [unix]
 
 test:
   commands:
