@@ -1,6 +1,5 @@
-{% set name = "inchi" %}
+{% set name = "InChI" %}
 {% set version = "1.05" %}
-{% set sha1 = "e3872a46d58cb321a98f4fd4b93a989fb6920b9c" %}
 
 package:
   name: {{ name|lower }}
@@ -8,13 +7,15 @@ package:
 
 source:
   url: http://www.inchi-trust.org/download/105/INCHI-1-SRC.zip
-  sha1:  {{ sha1 }}
+  sha256: 4ac311ca3a16fa75d695ec4fc711e74045c6d6c882dea0dd1055961fba643720
   patches:
     - afxres.patch  # [win and vc<14]
     - osx.patch  # [osx]
 
 build:
   number: 0
+  run_exports:
+    - {{ pin_subpackage('inchi', max_pin='x.x') }}
 
 requirements:
   build:
@@ -23,7 +24,10 @@ requirements:
 
 test:
   commands:
-    - python -c "import os; import glob; assert len(glob.glob(os.path.join(os.getenv('PREFIX'), 'lib', 'libinchi.*'))) == 1"
+    - inchi-1
+    - test -f $PREFIX/lib/libinchi.so  # [linux]
+    - test -f $PREFIX/lib/libinchi.dylib  # [osx]
+    - if not exist %LIBRARY_LIB%\\libinchi.lib exit 1  # [win]
 
 about:
   home: https://www.inchi-trust.org/
