@@ -10,11 +10,11 @@ source:
   url: http://www.inchi-trust.org/download/105/INCHI-1-SRC.zip
   sha1:  {{ sha1 }}
   patches:
+    - afxres.patch  # [win and vc<14]
     - osx.patch  # [osx]
 
 build:
   number: 0
-  skip: True  # [win]
 
 requirements:
   build:
