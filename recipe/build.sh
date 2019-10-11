@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # Build and install libinchi
+mkdir -p $PREFIX/lib
 cd $SRC_DIR/INCHI_API/libinchi/gcc
 make C_COMPILER="$CC" SHARED_LINK="$CC -shared" LINKER="$CC -s -Wl,-R,''" LIB_DIR="$PREFIX/lib"
 
