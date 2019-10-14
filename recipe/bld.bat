@@ -3,7 +3,7 @@ cd %SRC_DIR%\INCHI_API\libinchi\vc9
 if "%VS_YEAR%" == "2008" (
   vcbuild libinchi.vcproj Release /platform=x64
 ) else (
-  "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\IDE\devenv.exe" /Upgrade libinchi.vcproj
+  "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\IDE\devenv.com" /Upgrade libinchi.vcproj
   msbuild libinchi.vcxproj /p:Configuration=Release /p:Platform=x64
 )
 copy %SRC_DIR%\INCHI_API\bin\Windows\x64\Release\libinchi.dll %LIBRARY_BIN%\libinchi.dll
