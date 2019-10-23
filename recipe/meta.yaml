@@ -15,7 +15,6 @@ source:
 
 build:
   number: 0
-  skip: True  # [win]
   run_exports:
     - {{ pin_subpackage('inchi', max_pin='x.x') }}
 
@@ -26,6 +25,7 @@ requirements:
 
 test:
   commands:
+    - inchi-1
     - test -f $PREFIX/lib/libinchi.so  # [linux]
     - test -f $PREFIX/lib/libinchi.dylib  # [osx]
     - if not exist %LIBRARY_LIB%\inchi.lib exit 1  # [win]
