@@ -29,6 +29,7 @@ test:
     - test -f $PREFIX/lib/libinchi.so  # [linux]
     - test -f $PREFIX/lib/libinchi.dylib  # [osx]
     - if not exist %LIBRARY_LIB%\inchi.lib exit 1  # [win]
+    - if not exist %LIBRARY_BIN%\inchi.dll exit 1  # [win]
 
 about:
   home: https://www.inchi-trust.org/
