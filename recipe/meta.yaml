@@ -33,7 +33,7 @@ test:
 
 about:
   home: https://www.inchi-trust.org/
-  license: IUPAC/InChI-Trust Licence
+  license: LicenseRef-InChI
   license_file: LICENCE
   summary: "InChI: open-source chemical structure representation algorithm"
   description: |
