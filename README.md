@@ -3,7 +3,7 @@ About inchi
 
 Home: https://www.inchi-trust.org/
 
-Package license: IUPAC/InChI-Trust Licence
+Package license: LicenseRef-InChI
 
 Feedstock license: [BSD-3-Clause](https://github.com/conda-forge/inchi-feedstock/blob/master/LICENSE.txt)
 
