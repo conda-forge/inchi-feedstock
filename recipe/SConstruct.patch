@@ -1,15 +1,15 @@
 diff -crB --new-file SConstruct SConstruct
-*** SConstruct	1969-12-31 19:00:00.000000000 -0500
---- SConstruct	2019-04-01 21:19:00.656983623 -0400
+*** SConstruct	Thu Jan  1 00:00:00 1970
+--- SConstruct	Thu Oct 24 10:18:28 2019
 ***************
 *** 0 ****
---- 1,103 ----
+--- 1,138 ----
 + import os
 + 
 + def _AddObject(env, *args, **kwds):
 +     objdir = env.subst('$OBJDIR')
 +     root = Dir('#').path
-+     suffix = kwds.get('SHOBJSUFFIX') or env['SHOBJSUFFIX']
++     suffix = kwds.get('SHOBJSUFFIX') or env.subst('$SHOBJSUFFIX')
 +     objs = list()
 +     for node in env.arg2nodes(args):
 +         if node.get_suffix().startswith('.o'):
@@ -41,8 +41,18 @@ diff -crB --new-file SConstruct SConstruct
 +             env=env.Clone()
 +             env.Append(LINKFLAGS=['-install_name', '$PREFIX/lib/lib%s$SHLIBSUFFIX' % name])
 +         lib=env.SharedLibrary('$LIBDIR/%s' % name, objs, **kwds)
-+     _Install(env,'lib',lib, **kwds)
++     if env["PLATFORM"] == 'win32':
++         for f in lib:
++             subdir = 'bin' if str(f).endswith('.dll') else 'lib'
++             _Install(env, subdir, f, **kwds)
++     else:
++         _Install(env,'lib',lib, **kwds)
 +     return lib
++ 
++ def _AddProgram(env, name, *args, **kwds):
++     exe = env.Program(name, *args, **kwds)
++     _Install(env, 'bin', exe, **kwds)
++     return exe
 + 
 + def _Install(env,subdir,stuff,**kwds):
 +     if not env.get('PREFIX'): return
@@ -66,7 +76,6 @@ diff -crB --new-file SConstruct SConstruct
 +     opts.Add("OBJDIR", "build product location", 'build')
 +     opts.Add("PREFIX", "installation location")
 +     opts.Update(env)
-+
 +     #
 +     # Inherit environment from outside for these environment variables
 +     #
@@ -74,7 +83,6 @@ diff -crB --new-file SConstruct SConstruct
 +     for envvar in TOOLCHAIN:
 +         if envvar in os.environ:
 +             env.Replace(**{envvar: os.environ[envvar]})
-+
 +     builddir = env.Dir(env['OBJDIR']).srcnode().abspath
 +     env['BUILDDIR'] = builddir
 +     env['OBJDIR'] = '$BUILDDIR/obj'
@@ -97,13 +105,40 @@ diff -crB --new-file SConstruct SConstruct
 +     else:
 +         env.Append(RPATH=['$LIBDIR'], LIBPATH=['$LIBDIR'])
 + 
++ # Build libinchi
 + env = Environment()
 + generate(env)
 + 
-+ env.Replace(CCFLAGS='', CFLAGS='-ansi -O3')
-+ env.Append(CPPDEFINES=['TARGET_API_LIB', 'COMPILE_ANSI_ONLY'])
++ if env["PLATFORM"] == 'win32':
++     # Windows preprocessor definitions taken from libinchi.vcproj
++     env.Append(CPPDEFINES=[
++         '_WINDOWS', '_MBCS', '_USRDLL', 'BUILD_LINK_AS_DLL', 'COMPILE_ANSI_ONLY',
++         'TARGET_API_LIB=1'
++     ])
++ else:
++     env.Replace(CCFLAGS='', CFLAGS='-ansi -O3')
++     env.Append(CPPDEFINES=['TARGET_API_LIB', 'COMPILE_ANSI_ONLY'])
 + env.AddHeaders(Glob('INCHI_BASE/src/*.h'), prefix='inchi', stage=True)
++ env.AddHeaders(Glob('INCHI_API/libinchi/src/*.h'), prefix='inchi', stage=True)
 + srcs  = Glob('INCHI_BASE/src/*.c')
 + srcs += Glob('INCHI_API/libinchi/src/*.c')
 + srcs += Glob('INCHI_API/libinchi/src/ixa/*.c')
 + libinchi = env.AddLibrary('inchi', srcs)
++ 
++ # Build inchi-1 executable
++ env2 = Environment()
++ generate(env2)
++ 
++ if env2["PLATFORM"] == 'win32':
++     # Windows preprocessor definitions taken from inchi-1.vcproj
++     env2.Append(CPPDEFINES=[
++         'WIN32', 'WIN64', 'NDEBUG', '_CONSOLE', 'ADD_CMLPP=0', 'COMPILE_ANSI_ONLY',
++         'TARGET_EXE_STANDALONE=1'
++     ])
++ else:
++     env2.Replace(CCFLAGS='', CFLAGS='-ansi -O3', LIBS=['m'])
++     env2.Append(CPPDEFINES=['TARGET_EXE_STANDALONE', 'COMPILE_ANSI_ONLY'])
++ env2.Replace(CPPPATH=['INCHI_BASE/src', 'INCHI_EXE/inchi-1/src'])
++ exe_srcs = Glob('INCHI_BASE/src/*.c')
++ exe_srcs += Glob('INCHI_EXE/inchi-1/src/*.c')
++ exe = env2.AddProgram('inchi-1', exe_srcs)
